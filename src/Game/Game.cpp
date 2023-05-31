@@ -1,0 +1,43 @@
+//
+// Created by super on 25.05.2023.
+//
+
+#include "Game.hpp"
+#include "SplashState.hpp"
+#include <cstdlib>
+#include <ctime>
+
+
+namespace Donpad{
+    Game::Game(int width, int height, std::string title) {
+        srand(time(NULL));
+        _data->window.create(sf::VideoMode(width, height),
+                             title,sf::Style::Close | sf::Style::Titlebar );
+        _data->window.setFramerateLimit(60);
+        _data->finalStateMachine.AddState(StateRef(new SplashState(this->_data)));
+        this->Run();
+    }
+    void Game::Run() {
+        float newTime, frameTime, interpolation;
+        float currentTime = this->_clock.getElapsedTime().asSeconds();
+        float accumulator = 0.0f;
+        while (this->_data->window.isOpen()){
+            this->_data->finalStateMachine.ProccesStateChanges();
+            newTime= this->_clock.getElapsedTime().asSeconds();
+            frameTime = newTime - currentTime;
+            if (frameTime > 0.25f)
+            {
+                frameTime = 0.25f;
+                accumulator += frameTime;
+
+                while (accumulator >= dt){
+                    this->_data->finalStateMachine.GetActiveState()->HandleInput();
+                    this->_data->finalStateMachine.GetActiveState()->Update(dt);
+                    accumulator -= dt;
+            }
+                interpolation = accumulator/dt;
+                this->_data->finalStateMachine.GetActiveState()->Draw(interpolation);
+            }
+        }
+    }
+}

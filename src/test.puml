@@ -1,0 +1,177 @@
+@startuml
+ class FSM {
+        + FSM();
+        + ~FSM();
+        + void AddState(StateRef newState, bool isReplacing = true);
+        + void RemoveState();
+        + void ProccesStateChanges();
+        + StateRef &GetActiveState();
+        - std::stack<StateRef> _states;
+        - StateRef _newState;
+        - bool _isRemoving;
+        - bool _isAdding;
+        - bool _isReplacing;
+    }
+interface State {
+       + virtual void Init()
+
+       + virtual void HandleInput()
+
+       + virtual void Update(float dt)
+
+       + virtual void Draw(float dt)
+
+       + virtual void Pause()
+
+       + virtual void Resume()
+    }
+
+class AssetManager {
+
+       + AssetManager()
+       + ~AssetManager()
+       + void LoadTexture(std::string name, std::string filename)
+       + sf::Texture &GetTexture(std::string name)
+
+       + void LoadFont(std::string name, std::string filename)
+       + sf::Font &GetFont(std::string name)
+
+
+       - std::map<std::string , sf::Texture> _textures
+       - std::map<std::string , sf::Font> _fonts
+    }
+
+class InputManager {
+        + InputManager()
+        + ~InputManager()
+        + bool IsSpriteClicked(sf::Sprite object, sf::Mouse::Button button, sf::RenderWindow &window)
+        + sf::Vector2i GetMousePosition(sf::RenderWindow &window)
+    }
+
+struct GameData{
+        FSM finalStateMachine
+        sf::RenderWindow window
+        AssetManager assets
+        InputManager inputs
+    }
+
+class Game {
+        + Game(int width, int height, std::string title)
+
+        - const float dt
+        - sf::Clock _clock
+        - GameDataRef _data
+        - void Run()
+    }
+
+ class GameOverState{
+        +GameOverState(GameDataRef data);
+        +void Init();
+        +void HandleInput();
+        +void Update(float dt);
+        +void Draw(float dt);
+
+        -GameDataRef _data;
+        -sf::Sprite _backgroundSprite;
+    }
+
+class GameState{
+        +GameState(GameDataRef data)
+        +void Init()
+        +void HandleInput()
+        +void Update(float dt)
+        +void Draw(float dt)
+
+        -GameDataRef _data
+        -sf::Sprite _backgroundSprite;
+        -Pipe *_pipe
+        -sf::Clock _clock
+    }
+
+class MainMenuState{
+       + MainMenuState(GameDataRef data)
+       + void Init();
+       + void HandleInput();
+       + void Update(float dt);
+       + void Draw(float dt);
+       + void Pause()
+       + void Resume()
+
+       -GameDataRef _data;
+       -sf::Sprite _backGround;
+       -sf::Sprite _title;
+       -sf::Sprite _play_button;
+    }
+
+class SplashState{
+
+        +SplashState(GameDataRef data)
+        +void Init()
+        +void HandleInput()
+        +void Update(float dt)
+        +void Draw(float dt)
+
+
+        -GameDataRef _data
+        -sf::Clock _clock
+        -sf::Sprite _backgroundSprite
+    }
+
+ class Pipe {
+
+        +Pipe(GameDataRef data)
+        +void DrawPipes()
+        +void SpawnBottomPipe()
+        +void SpawnTopPipe()
+        +void SpawnInvisiblePipe()
+        +void MovePipes( float dt)
+
+        -GameDataRef _data
+        -std::vector<sf::Sprite> pipes
+    }
+
+  class Player {
+
+         +Player(GameDataRef data)
+         +void DrawPlayer()
+         +void SpawnPlayer()
+         +void KillPlayer()
+         +void MovePlayer( float dt)
+
+         -GameDataRef _data
+         -std::vector<sf::Sprite> pipes
+     }
+
+
+   class ScoreBoard {
+
+          +ScoreBoard(GameDataRef data)
+          +void DrawScoreBoard()
+          +void UpdateScoreBoard()
+
+          -GameDataRef _data
+          -std::vector<sf::Sprite> pipes
+      }
+
+ScoreBoard --> GameOverState
+ScoreBoard --> GameState
+Player --> GameState
+Pipe --> GameState
+FSM --> GameData
+AssetManager --> GameData
+InputManager --> GameData
+GameData --> Game
+
+ScoreBoard --> GameData
+Player --> GameData
+Pipe --> GameData
+SplashState --> GameData
+MainMenuState --> GameData
+GameOverState --> GameData
+GameState --> GameData
+
+SplashState ..|> State
+MainMenuState ..|> State
+GameOverState ..|> State
+GameState ..|> State
+@enduml
